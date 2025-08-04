@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+  },
+  "files": [
+  
+  ],
+  "include": ["./packages/*/index.ts"]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@piying/orm",
+  "version": "1.0.8",
+  "description": "皮影-orm",
+  "author": "wszgrcy",
+  "sideEffects": false,
+  "type": "module",
+  "peerDependencies": {
+    "typeorm": "^0.3.25"
+  },
+  "dependencies": {
+    "@piying/valibot-visit": "^1.1.6",
+    "fast-equals": "^5.2.2",
+    "rfdc": "^1.4.1",
+    "static-injector": "^6.1.2"
+  },
+  "overrides": {},
+  "exports": {
+    "./core": {
+      "types": "./core/index.d.ts",
+      "import": "./core/index.mjs"
+    },
+    "./typeorm": {
+      "types": "./typeorm/index.d.ts",
+      "import": "./typeorm/index.mjs"
+    }
+  }
+}
