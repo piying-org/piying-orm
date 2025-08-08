@@ -4,6 +4,7 @@ import {
   EntitySchemaEmbeddedColumnOptions,
   EntitySchemaIndexOptions,
   EntitySchemaRelationOptions,
+  EntityTarget,
 } from 'typeorm';
 import { inject } from 'static-injector';
 import {
@@ -26,7 +27,13 @@ export class TypeormBuilder extends OrmBuilder {
       {} as Record<string, EntitySchema>,
     );
   }
-
+  #getForeignKey(input: EntityTarget<any>) {
+    return typeof input === 'string'
+      ? input
+      : () => {
+          return this.#entityMap.get((input as any)())!;
+        };
+  }
   buildEntity(entity: AnyCoreSchemaHandle, key: string) {
     const columns = {} as Record<string, EntitySchemaColumnOptions>;
     const indexList: EntitySchemaIndexOptions[] = [];
@@ -64,10 +71,7 @@ export class TypeormBuilder extends OrmBuilder {
       if (item.foreignKey) {
         options.foreignKey = {
           ...item.foreignKey,
-          target: () =>
-            typeof item.foreignKey!.target === 'string'
-              ? item.foreignKey!.target
-              : this.#entityMap.get(item.foreignKey!.target()),
+          target: this.#getForeignKey(item.foreignKey!.target),
         };
       }
       if (item.index) {
@@ -123,10 +127,7 @@ export class TypeormBuilder extends OrmBuilder {
       },
       foreignKeys: entity.tableSchema.foreignKeys?.map((item) => ({
         ...item,
-        target:
-          typeof item.target === 'string'
-            ? item.target
-            : () => this.#entityMap.get((item as any).target())!.options.name,
+        target: this.#getForeignKey(item.target),
       })),
       embeddeds: { ...entity.tableSchema.embeddeds, ...embeddeds },
     });
