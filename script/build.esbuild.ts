@@ -34,7 +34,10 @@ async function main() {
       copy({
         resolveFrom: 'cwd',
         once: true,
-        assets: [{ from: `./assets/*`, to: './dist' }],
+        assets: [
+          { from: `./assets/*`, to: './dist' },
+          { from: `./readme.md`, to: './dist/readme.md' },
+        ],
       }),
     ],
   };
