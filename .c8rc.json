@@ -3,5 +3,11 @@
         "html",
         "text",
         "lcovonly"
-    ]
+    ],
+    "exclude": [
+        "**/*.spec.ts",
+        "script/**/*",
+        "packages/typeorm/test/**/*"
+    ],
+    "exclude-after-remap": true
 }
