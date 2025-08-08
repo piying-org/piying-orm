@@ -2,8 +2,9 @@ import * as v from 'valibot';
 import { expect } from 'chai';
 import { columnPrimaryKey, entity } from '@piying/orm/core';
 import { createInstance } from './util/create-builder';
-import { noColumn } from '../../core/action/column-schema';
+import { column, noColumn } from '../../core/action/column-schema';
 import { StrColumn } from './util/schema';
+import { asControl } from '@piying/valibot-visit';
 
 describe('column', () => {
   it.skip('VirtualColumn', async () => {
@@ -67,5 +68,26 @@ describe('column', () => {
     const entityList = await repo.find();
     expect(entityList.length).eq(1);
     expect(entityList[0].p1).eq(2);
+  });
+  it('simple-array', async () => {
+    const define = v.pipe(
+      v.object({
+        id: v.pipe(
+          v.string(),
+          columnPrimaryKey({ primary: true, generated: 'uuid' }),
+        ),
+        list: v.pipe(
+          v.array(v.string()),
+          asControl(),
+          column({ type: 'simple-array' }),
+        ),
+      }),
+    );
+    const { object, dataSource } = await createInstance({ tableTest: define });
+    const repo = dataSource.getRepository(object.tableTest);
+    await repo.save([{ list: ['1', '2'] }]);
+    const entityList = await repo.find();
+    expect(entityList.length).eq(1);
+    expect(entityList[0].list).deep.eq(['1', '2']);
   });
 });
