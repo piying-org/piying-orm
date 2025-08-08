@@ -1,8 +1,33 @@
 {
   "name": "@piying/orm",
   "version": "1.0.8",
-  "description": "皮影-orm",
-  "author": "wszgrcy",
+  "description": "piying-orm;Valibot to Orm",
+  "homepage": "https://piying-org.github.io/website/docs/client/intro",
+  "repository": {
+    "url": "https://github.com/piying-org/piying-orm",
+    "type": "git"
+  },
+  "bugs": {
+    "url": "https://github.com/piying-org/piying-orm/issues"
+  },
+  "author": {
+    "name": "wszgrcy",
+    "url": "https://github.com/wszgrcy",
+    "email": "wszgrcy@gmail.com"
+  },
+  "keywords": [
+    "valibot",
+    "orm",
+    "typeorm",
+    "server",
+    "entity",
+    "define",
+    "schema",
+    "validation",
+    "validator",
+    "metadata"
+  ],
+  "license": "MIT",
   "sideEffects": false,
   "type": "module",
   "peerDependencies": {
@@ -14,7 +39,6 @@
     "rfdc": "^1.4.1",
     "static-injector": "^6.1.2"
   },
-  "overrides": {},
   "exports": {
     "./core": {
       "types": "./core/index.d.ts",
