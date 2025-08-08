@@ -62,6 +62,7 @@ export class TypeormBuilder extends OrmBuilder {
       if (item.type === 'picklist' || item.type === 'enum') {
         let firstType = typeof item.props!['options'][0];
         options.type = this.#config.defaultConfig?.types[firstType]?.type;
+        options.enum = item.props!['options'];
       } else {
         options.type = this.#config.defaultConfig?.types[item.type!]?.type;
       }
