@@ -69,6 +69,28 @@ describe('column', () => {
     expect(entityList.length).eq(1);
     expect(entityList[0].p1).eq(2);
   });
+  it('simple-enum', async () => {
+    enum E1 {
+      a = 1,
+      b = 2,
+    }
+    const define = v.pipe(
+      v.object({
+        id: v.pipe(
+          v.string(),
+          columnPrimaryKey({ primary: true, generated: 'uuid' }),
+        ),
+        p1: v.pipe(v.enum(E1), column({ type: 'simple-enum' })),
+      }),
+    );
+    const { object, dataSource } = await createInstance({ tableTest: define });
+    const repo = dataSource.getRepository(object.tableTest);
+    await repo.save([{ p1: E1.b }]);
+    const entityList = await repo.find();
+    expect(entityList.length).eq(1);
+    expect(entityList[0].p1).eq(2);
+  });
+
   it('simple-array', async () => {
     const define = v.pipe(
       v.object({
