@@ -14,8 +14,13 @@ import {
 } from '@piying/orm/core';
 import { EntitySchemaRelationIdOptions } from '@piying/orm/core';
 import { DataSource } from 'typeorm/browser';
+function createTarget(name: string) {
+  return {
+    [name]: function () {},
+  }[name];
+}
 export class TypeormBuilder extends OrmBuilder {
-  #entityMap = new Map<any, EntitySchema>();
+  #entityMap = new Map<any, () => void>();
   #config = inject(PI_ORM_CONFIG_TOKEN);
   buildEntitys(list: Record<string, AnyCoreSchemaHandle>): any {
     return Object.entries(list).reduce(
@@ -81,11 +86,9 @@ export class TypeormBuilder extends OrmBuilder {
         });
       }
       if (item.relation) {
-        // let refSchema=this.#entityMap.get((item.relation! as any).target())!
         relations[item.key!] = {
           ...item.relation,
-          target: () =>
-            this.#entityMap.get((item.relation! as any).target())!.options.name,
+          target: () => this.#entityMap.get((item.relation! as any).target()),
         };
       } else if (item.relationId) {
         relationIds[item.key!] = item.relationId;
@@ -111,9 +114,12 @@ export class TypeormBuilder extends OrmBuilder {
                 getEntity: (input: any) => this.#entityMap.get(input),
               });
     }
+    const name = entity.tableSchema.name ?? key;
+    const target = createTarget(name);
     const instance = new EntitySchema({
       ...entity.tableSchema,
-      name: entity.tableSchema.name ?? key,
+      target,
+      name,
       tableName: entity.tableSchema.tableName ?? key,
       columns: columns,
       indices: [...(entity.tableSchema.indices ?? []), ...indexList],
@@ -131,7 +137,7 @@ export class TypeormBuilder extends OrmBuilder {
       })),
       embeddeds: { ...entity.tableSchema.embeddeds, ...embeddeds },
     });
-    this.#entityMap.set(entity.sourceSchema, instance);
+    this.#entityMap.set(entity.sourceSchema, target);
     return instance;
   }
 }
