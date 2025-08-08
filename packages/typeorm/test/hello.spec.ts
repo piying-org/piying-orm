@@ -50,4 +50,20 @@ describe('hello', () => {
     expect(entityList[0].bool1).eq(true);
     expect(entityList[0].id).ok;
   });
+  it('comment', async () => {
+    const define = v.pipe(
+      v.object({
+        id: IDSchema,
+        name: v.pipe(
+          v.string(),
+          v.title('name1'),
+          v.description('description1'),
+        ),
+      }),
+    );
+    const { object, dataSource } = await createInstance({ tableTest: define });
+    expect(object.tableTest.options.columns.name?.comment).eq(
+      'name1;description1',
+    );
+  });
 });
