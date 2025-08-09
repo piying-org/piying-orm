@@ -45,7 +45,7 @@ export class TypeormBuilder extends OrmBuilder {
         relationItem?: EntitySchemaRelationOptions;
         relationIdItem?: NonNullable<EntitySchemaRelationIdOptions>[string];
         embeddedItem?: EntitySchemaEmbeddedColumnOptions;
-        columnItem?: EntitySchemaColumnOptions;
+        columnItem: EntitySchemaColumnOptions;
       }
     | undefined {
     if (entity.noColumn) {
@@ -102,9 +102,7 @@ export class TypeormBuilder extends OrmBuilder {
       };
     } else if (entity.relationId) {
       relationIdItem = entity.relationId;
-      if (entity.columnSchema) {
-        columnItem = { ...options, ...entity.columnSchema };
-      }
+      columnItem = { ...options, ...entity.columnSchema };
     } else if (entity.arrayChild) {
       let child = entity.arrayChild;
       if (child.sourceSchema.type === 'object') {
@@ -147,9 +145,7 @@ export class TypeormBuilder extends OrmBuilder {
         relations[item.key!] = result?.relationItem;
       } else if (result?.relationIdItem) {
         relationIds[item.key!] = result?.relationIdItem;
-        if (result.columnItem && Object.keys(result.columnItem).length) {
-          columns[item.key!] = result.columnItem;
-        }
+        columns[item.key!] = result.columnItem;
       } else if (result?.embeddedItem) {
         embeddeds[item.key!] = result.embeddedItem;
       } else if (result?.columnItem) {

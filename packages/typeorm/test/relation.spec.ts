@@ -228,7 +228,7 @@ describe('relation', () => {
         ),
         ref2: v.pipe(
           v.lazy(() => define2),
-          oneToOne({ joinColumn: true, target: () => define2 }),
+          oneToOne({ joinColumn: { name: 'ref2Idm' }, target: () => define2 }),
         ),
         ref2Idm: v.pipe(v.string(), columnRelationId({ relationName: 'ref2' })),
       }),
@@ -257,9 +257,8 @@ describe('relation', () => {
     const repo1 = dataSource.getRepository(object.define1);
     const repo2 = dataSource.getRepository(object.define2);
     const repo2data = { define2Value: 'value2' };
-    await repo2.save([repo2data]);
-    const repo1data = { ref2: repo2data };
-    await repo1.save([repo1data]);
+    let [repo2data2] = await repo2.save([repo2data]);
+    await repo1.save([{ ref2Idm: repo2data2.id }]);
     const entityList = await repo1.find({ relations: ['ref2'] });
     expect(entityList.length).eq(1);
     expect(entityList[0].ref2).ok;
