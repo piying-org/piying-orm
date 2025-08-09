@@ -39,6 +39,99 @@ export class TypeormBuilder extends OrmBuilder {
           return this.#entityMap.get((input as any)())!;
         };
   }
+  #buildChild(entity: AnyCoreSchemaHandle):
+    | {
+        indexItem?: EntitySchemaIndexOptions;
+        relationItem?: EntitySchemaRelationOptions;
+        relationIdItem?: NonNullable<EntitySchemaRelationIdOptions>[string];
+        embeddedItem?: EntitySchemaEmbeddedColumnOptions;
+        columnItem?: EntitySchemaColumnOptions;
+      }
+    | undefined {
+    if (entity.noColumn) {
+      return;
+    }
+    const options: EntitySchemaColumnOptions = {} as any;
+    let indexItem: EntitySchemaIndexOptions | undefined;
+    let relationItem: EntitySchemaRelationOptions | undefined;
+    let relationIdItem:
+      | NonNullable<EntitySchemaRelationIdOptions>[string]
+      | undefined;
+    let embeddedItem: EntitySchemaEmbeddedColumnOptions | undefined;
+    let columnItem = {} as EntitySchemaColumnOptions;
+    if (!entity.formConfig.required) {
+      options.nullable = true;
+    }
+    if (entity.props?.['description'] || entity.props?.['title']) {
+      options.comment = [entity.props?.['title'], entity.props?.['description']]
+        .filter(Boolean)
+        .join(';');
+    }
+    options.default = entity.formConfig.defaultValue;
+    if (entity.type === 'picklist' || entity.type === 'enum') {
+      let firstType = typeof entity.props!['options'][0];
+      options.type = this.#config.defaultConfig?.types[firstType]?.type;
+      options.enum = entity.props!['options'];
+    } else {
+      options.type = this.#config.defaultConfig?.types[entity.type!]?.type;
+    }
+
+    if (entity.primaryKey) {
+      options.primary = entity.primaryKey.primary;
+      if (entity.primaryKey.generated) {
+        options.generated = entity.primaryKey.generated;
+      }
+    }
+
+    if (entity.foreignKey) {
+      options.foreignKey = {
+        ...entity.foreignKey,
+        target: this.#getForeignKey(entity.foreignKey!.target),
+      };
+    }
+    if (entity.index) {
+      indexItem = {
+        ...entity.index,
+        columns: [entity.key! as any],
+      };
+    }
+    if (entity.relation) {
+      relationItem = {
+        ...entity.relation,
+        target: () => this.#entityMap.get((entity.relation! as any).target()),
+      };
+    } else if (entity.relationId) {
+      relationIdItem = entity.relationId;
+      if (entity.columnSchema) {
+        columnItem = { ...options, ...entity.columnSchema };
+      }
+    } else if (entity.arrayChild) {
+      let child = entity.arrayChild;
+      if (child.sourceSchema.type === 'object') {
+        let schema = this.buildEntity(child, entity.key! as string);
+        embeddedItem = { schema, array: true, ...entity.embedded };
+      } else {
+        let childResult = this.#buildChild(child);
+        columnItem = childResult?.columnItem!;
+        indexItem = childResult?.indexItem;
+      }
+      columnItem.array = true;
+    } else if (entity.children && entity.children.length) {
+      let schema = this.buildEntity(entity, entity.key as string);
+      embeddedItem = { schema, ...entity.embedded };
+    } else if (entity.embedded) {
+      embeddedItem = entity.embedded as any;
+    } else {
+      columnItem = { ...options, ...entity.columnSchema };
+    }
+    return {
+      columnItem,
+      indexItem,
+      relationItem,
+      relationIdItem,
+      embeddedItem,
+    };
+  }
   buildEntity(entity: AnyCoreSchemaHandle, key: string) {
     const columns = {} as Record<string, EntitySchemaColumnOptions>;
     const indexList: EntitySchemaIndexOptions[] = [];
@@ -46,63 +139,21 @@ export class TypeormBuilder extends OrmBuilder {
     const relationIds: EntitySchemaRelationIdOptions = {};
     let embeddeds: Record<string, EntitySchemaEmbeddedColumnOptions> = {};
     for (const item of entity.children) {
-      if (item.noColumn) {
-        continue;
+      let result = this.#buildChild(item);
+      if (result?.indexItem) {
+        indexList.push(result.indexItem);
       }
-      const options: EntitySchemaColumnOptions = {} as any;
-      if (!item.formConfig.required) {
-        options.nullable = true;
-      }
-      if (item.props?.['description'] || item.props?.['title']) {
-        options.comment = [item.props?.['title'], item.props?.['description']]
-          .filter(Boolean)
-          .join(';');
-      }
-      options.default = item.formConfig.defaultValue;
-      if (item.type === 'picklist' || item.type === 'enum') {
-        let firstType = typeof item.props!['options'][0];
-        options.type = this.#config.defaultConfig?.types[firstType]?.type;
-        options.enum = item.props!['options'];
-      } else {
-        options.type = this.#config.defaultConfig?.types[item.type!]?.type;
-      }
-
-      if (item.primaryKey) {
-        options.primary = item.primaryKey.primary;
-        if (item.primaryKey.generated) {
-          options.generated = item.primaryKey.generated;
+      if (result?.relationItem) {
+        relations[item.key!] = result?.relationItem;
+      } else if (result?.relationIdItem) {
+        relationIds[item.key!] = result?.relationIdItem;
+        if (result.columnItem && Object.keys(result.columnItem).length) {
+          columns[item.key!] = result.columnItem;
         }
-      }
-
-      if (item.foreignKey) {
-        options.foreignKey = {
-          ...item.foreignKey,
-          target: this.#getForeignKey(item.foreignKey!.target),
-        };
-      }
-      if (item.index) {
-        indexList.push({
-          ...item.index,
-          columns: [item.key! as any],
-        });
-      }
-      if (item.relation) {
-        relations[item.key!] = {
-          ...item.relation,
-          target: () => this.#entityMap.get((item.relation! as any).target()),
-        };
-      } else if (item.relationId) {
-        relationIds[item.key!] = item.relationId;
-        if (item.columnSchema) {
-          columns[item.key!] = { ...options, ...item.columnSchema };
-        }
-      } else if (item.children && item.children.length) {
-        let schema = this.buildEntity(item, item.key as string);
-        embeddeds[item.key!] = { schema, ...item.embedded };
-      } else if (item.embedded) {
-        embeddeds[item.key!] = item.embedded as any;
-      } else {
-        columns[item.key!] = { ...options, ...item.columnSchema };
+      } else if (result?.embeddedItem) {
+        embeddeds[item.key!] = result.embeddedItem;
+      } else if (result?.columnItem) {
+        columns[item.key!] = result.columnItem;
       }
     }
     if (entity.tableSchema.expression) {

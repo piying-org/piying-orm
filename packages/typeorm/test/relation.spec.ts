@@ -13,7 +13,7 @@ import {
 import { createInstance } from './util/create-builder';
 import { StrColumn } from './util/schema';
 
-describe('hello', () => {
+describe('relation', () => {
   it('一对一', async () => {
     const define1 = v.pipe(
       v.object({

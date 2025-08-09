@@ -133,4 +133,49 @@ describe('column', () => {
     expect(entityList.length).eq(1);
     expect(entityList[0].obj).deep.eq({ k1: '1', k2: 2 });
   });
+
+  it('array(postgres)', async () => {
+    const define = v.pipe(
+      v.object({
+        id: v.pipe(
+          v.string(),
+          columnPrimaryKey({ primary: true, generated: 'uuid' }),
+        ),
+        list: v.pipe(v.array(v.string()), column({ array: true })),
+      }),
+    );
+    const { object, dataSource } = await createInstance(
+      { tableTest: define },
+      undefined,
+      { disableInit: true },
+    );
+    expect(object.tableTest.options.columns.list?.array).eq(true);
+    expect(object.tableTest.options.columns.list?.type).eq(String);
+  });
+  it('array-columns(mongodb)', async () => {
+    const define = v.pipe(
+      v.object({
+        id: v.pipe(
+          v.string(),
+          columnPrimaryKey({ primary: true, generated: 'uuid' }),
+        ),
+        other1: v.pipe(
+          v.array(v.object({ likes: v.number(), text: v.string() })),
+          column({ array: true }),
+        ),
+      }),
+    );
+    const { object, dataSource } = await createInstance(
+      { tableTest: define },
+      undefined,
+      { disableInit: true },
+    );
+
+    expect(object.tableTest.options.embeddeds?.other1).ok;
+    expect(object.tableTest.options.embeddeds?.other1?.array).true;
+    expect(object.tableTest.options.embeddeds?.other1?.schema).ok;
+    expect(
+      object.tableTest.options.embeddeds?.other1?.schema.options.columns['likes'],
+    ).ok;
+  });
 });

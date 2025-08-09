@@ -6,7 +6,11 @@ export type InputTuple<T> = {
 };
 export async function createInstance<
   EntityObj extends Record<string, v.BaseSchema<any, any, any>>,
->(list: EntityObj, dataSourceOptions?: Partial<DataSourceOptions>) {
+>(
+  list: EntityObj,
+  dataSourceOptions?: Partial<DataSourceOptions>,
+  options?: { disableInit?: boolean },
+) {
   const instance = convert(list, {
     dataSourceOptions: {
       type: 'better-sqlite3',
@@ -16,6 +20,8 @@ export async function createInstance<
       ...dataSourceOptions,
     } as DataSourceOptions,
   });
-  await instance.dataSource.initialize();
+  if (!options?.disableInit) {
+    await instance.dataSource.initialize();
+  }
   return instance;
 }
