@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 import { expect } from 'chai';
-import { columnPrimaryKey, entity } from '@piying/orm/core';
+import { columnObjectId, columnPrimaryKey, entity } from '@piying/orm/core';
 import { createInstance } from './util/create-builder';
 import { column, noColumn } from '../../core/action/column-schema';
 import { StrColumn } from './util/schema';
@@ -152,6 +152,26 @@ describe('column', () => {
     expect(object.tableTest.options.columns.list?.array).eq(true);
     expect(object.tableTest.options.columns.list?.type).eq(String);
   });
+  it('objectId(mongodb)', async () => {
+    const define = v.pipe(
+      v.object({
+        _id: v.pipe(
+          v.string(),
+          columnObjectId(),
+        ),
+        k1: v.pipe(v.string(), column()),
+      }),
+    );
+    const { object, dataSource } = await createInstance(
+      { tableTest: define },
+      undefined,
+      { disableInit: true },
+    );
+
+    expect(object.tableTest.options.columns._id).ok;
+    expect(object.tableTest.options.columns._id?.objectId).true;
+    expect(object.tableTest.options.columns._id?.primary).true;
+  });
   it('array-columns(mongodb)', async () => {
     const define = v.pipe(
       v.object({
@@ -175,7 +195,9 @@ describe('column', () => {
     expect(object.tableTest.options.embeddeds?.other1?.array).true;
     expect(object.tableTest.options.embeddeds?.other1?.schema).ok;
     expect(
-      object.tableTest.options.embeddeds?.other1?.schema.options.columns['likes'],
+      object.tableTest.options.embeddeds?.other1?.schema.options.columns[
+        'likes'
+      ],
     ).ok;
   });
 });

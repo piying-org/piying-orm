@@ -5,6 +5,7 @@ import {
   entity,
   entityUnique,
   entityCheck,
+  entityExclusion,
 } from '@piying/orm/core';
 import { createInstance } from './util/create-builder';
 import { IDSchema, StrColumn } from './util/schema';
@@ -69,5 +70,26 @@ WHERE type = 'table' and tbl_name = 'tableTest';`);
       return;
     }
     throw new Error('SQLITE_CONSTRAINT_CHECK失败');
+  });
+  it('entityExclusion', async () => {
+    const define = v.pipe(
+      v.object({
+        room: v.string(),
+        from: v.date(),
+        to: v.date(),
+      }),
+      entityExclusion({
+        expression: `USING gist ("room" WITH =, tsrange("from", "to") WITH &&)`,
+      }),
+    );
+    const { object, dataSource } = await createInstance(
+      { tableTest: define },
+      undefined,
+      { disableInit: true },
+    );
+    expect(object.tableTest.options.exclusions?.length).eq(1);
+    expect(object.tableTest.options.exclusions?.[0].expression).eq(
+      `USING gist ("room" WITH =, tsrange("from", "to") WITH &&)`,
+    );
   });
 });
