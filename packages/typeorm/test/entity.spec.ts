@@ -55,7 +55,7 @@ WHERE type = 'table' and tbl_name = 'tableTest';`);
         tableName: 'tableTest',
         name: 'test',
       }),
-      entityCheck([{ expression: '"age" > 18' }]),
+      entityCheck({ expression: '"age" > 18' }),
     );
     const { object, dataSource } = await createInstance({ tableTest: define });
 
