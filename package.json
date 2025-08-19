@@ -36,6 +36,6 @@
     "fast-equals": "^5.2.2",
     "rfdc": "^1.4.1",
     "static-injector": "^6.1.2",
-    "typeorm": "^0.3.25"
+    "typeorm": "^0.3.26"
   }
 }

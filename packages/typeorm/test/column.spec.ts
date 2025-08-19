@@ -2,34 +2,35 @@ import * as v from 'valibot';
 import { expect } from 'chai';
 import { columnObjectId, columnPrimaryKey, entity } from '@piying/orm/core';
 import { createInstance } from './util/create-builder';
-import { column, noColumn } from '../../core/action/column-schema';
+import { column, columnVirtual, noColumn } from '../../core/action/column-schema';
 import { StrColumn } from './util/schema';
 import { asControl } from '@piying/valibot-visit';
 
 describe('column', () => {
-  it.skip('VirtualColumn', async () => {
+  it('VirtualColumn', async () => {
     const define = v.pipe(
       v.object({
         id: v.pipe(
           v.string(),
           columnPrimaryKey({ primary: true, generated: 'uuid' }),
         ),
-        name: StrColumn,
-        vc: v.pipe(v.string(), noColumn()),
-      }),
-      // entityName('test'),
-      entity({
-        tableName: 'tableTest',
-        name: 'test',
+        k1: v.number(),
+        vk1: v.pipe(
+          v.number(),
+          columnVirtual({
+            query: (alias) =>
+              `SELECT k1 FROM "tableTest" WHERE "k1" = ${alias}."k1"`,
+          }),
+        ),
       }),
     );
     const { object, dataSource } = await createInstance({ tableTest: define });
     const repo = dataSource.getRepository(object.tableTest);
-    await repo.save([{ name: 'v1' }]);
+    await repo.save({ k1: 'v1' } as any);
     const entityList = await repo.find();
     expect(entityList.length).eq(1);
-    expect(entityList[0].name).eq('v1');
-    expect(entityList[0].id).ok;
+    expect(entityList[0].k1).eq('v1');
+    expect(entityList[0].vk1).eq('v1');
   });
   it('picklist', async () => {
     const define = v.pipe(
@@ -155,10 +156,7 @@ describe('column', () => {
   it('objectId(mongodb)', async () => {
     const define = v.pipe(
       v.object({
-        _id: v.pipe(
-          v.string(),
-          columnObjectId(),
-        ),
+        _id: v.pipe(v.string(), columnObjectId()),
         k1: v.pipe(v.string(), column()),
       }),
     );

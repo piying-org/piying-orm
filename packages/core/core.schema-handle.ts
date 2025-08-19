@@ -96,6 +96,13 @@ export class OrmCoreSchemaHandle<
   }
   override intersectBefore(schema: IntersectSchema): void {
     this.isLogicAnd = true;
+    for (const child of this.children as AnyCoreSchemaHandle[]) {
+      if (!child.isGroup) {
+        this.isGroup = false;
+        break;
+      }
+    }
+    this.isGroup = true;
   }
   override logicItemSchema(
     schema: v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
@@ -105,10 +112,12 @@ export class OrmCoreSchemaHandle<
     const sh = new this.globalConfig.handle(this.globalConfig, this, schema);
     sh.parent = this.parent;
     convertSchema(schema as SchemaOrPipe, sh);
-    sh.children.forEach((item: AnyCoreSchemaHandle) => {
-      item.parent = this;
-    });
-    this.children.push(...sh.children);
+    if (type === 'intersect' && this.isGroup) {
+      sh.children.forEach((item: AnyCoreSchemaHandle) => {
+        item.parent = this;
+      });
+      this.children.push(...sh.children);
+    }
   }
   unionSchema(schema: UnionSchema): void {
     this.isObjectControl = true;

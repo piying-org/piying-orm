@@ -31,7 +31,7 @@
   "sideEffects": false,
   "type": "module",
   "peerDependencies": {
-    "typeorm": "^0.3.25"
+    "typeorm": "^0.3.26"
   },
   "dependencies": {
     "@piying/valibot-visit": "^1.1.6",
