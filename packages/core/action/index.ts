@@ -7,3 +7,4 @@ export * from './column-relation';
 export * from './entity';
 export * from './column-schema';
 export * from './column-object-id';
+export * from './column-tree';
