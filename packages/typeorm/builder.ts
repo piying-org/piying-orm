@@ -96,6 +96,10 @@ export class TypeormBuilder extends OrmBuilder {
       };
     }
     if (entity.relation) {
+      // tree bind self
+      if (entity.relation.treeChildren || entity.relation.treeParent) {
+        entity.relation.target = () => entity.parent!.sourceSchema;
+      }
       relationItem = {
         ...entity.relation,
         target: () => this.#entityMap.get((entity.relation! as any).target()),

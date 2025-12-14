@@ -10,6 +10,7 @@ export type EntitySchemaOptions = SetOptional<
   NonNullable<Omit<TSO<any>, 'columns'>>,
   'name'
 >;
+type Tree = NonNullable<EntitySchemaOptions['trees']>[number];
 export function entity<T>(value: Partial<EntitySchemaOptions>) {
   return rawConfig<T>((field) => {
     field.tableSchema = { ...field.tableSchema, ...value };
@@ -32,6 +33,16 @@ export function viewEntity<T>(value: ViewEntitySchemaOptions) {
       ...field.tableSchema,
       ...(value as any),
       type: 'view',
+    };
+  });
+}
+export function treeEntity<T>(input: Tree) {
+  return rawConfig<T>((field) => {
+    let list = field.tableSchema.trees ?? [];
+    list.push(input);
+    field.tableSchema = {
+      ...field.tableSchema,
+      trees: list,
     };
   });
 }
