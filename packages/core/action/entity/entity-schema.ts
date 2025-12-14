@@ -38,7 +38,7 @@ export function viewEntity<T>(value: ViewEntitySchemaOptions) {
 }
 export function treeEntity<T>(input: Tree) {
   return rawConfig<T>((field) => {
-    let list = field.tableSchema.trees ?? [];
+    const list = field.tableSchema.trees ?? [];
     list.push(input);
     field.tableSchema = {
       ...field.tableSchema,

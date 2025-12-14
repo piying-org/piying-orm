@@ -257,7 +257,7 @@ describe('relation', () => {
     const repo1 = dataSource.getRepository(object.define1);
     const repo2 = dataSource.getRepository(object.define2);
     const repo2data = { define2Value: 'value2' };
-    let [repo2data2] = await repo2.save([repo2data]);
+    const [repo2data2] = await repo2.save([repo2data]);
     await repo1.save([{ ref2Idm: repo2data2.id }]);
     const entityList = await repo1.find({ relations: ['ref2'] });
     expect(entityList.length).eq(1);
@@ -310,7 +310,7 @@ describe('relation', () => {
     const repo1 = dataSource.getRepository(object.define1);
     const repo2 = dataSource.getRepository(object.define2);
     const repo2data = { define2Value: 'value2' };
-    let repo2Res = await repo2.save([repo2data]);
+    const repo2Res = await repo2.save([repo2data]);
     await repo1.save([{ ref2Id: repo2Res[0].id }]);
     const entityList = await repo1.find({ relations: ['ref2'] });
     expect(entityList.length).eq(1);

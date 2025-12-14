@@ -1,9 +1,8 @@
 import * as v from 'valibot';
 import { expect } from 'chai';
-import { columnObjectId, columnPrimaryKey, entity } from '@piying/orm/core';
+import { columnObjectId, columnPrimaryKey } from '@piying/orm/core';
 import { createInstance } from './util/create-builder';
-import { column, columnVirtual, noColumn } from '../../core/action/column-schema';
-import { StrColumn } from './util/schema';
+import { column, columnVirtual } from '../../core/action/column-schema';
 import { asControl } from '@piying/valibot-visit';
 
 describe('column', () => {

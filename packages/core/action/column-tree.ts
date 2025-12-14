@@ -1,6 +1,5 @@
 import { OnDeleteType } from 'typeorm/metadata/types/OnDeleteType.js';
 import { rawConfig } from './raw-config';
-import { ColumnType, EntitySchemaColumnOptions as TSCO } from 'typeorm';
 import { ColumnRelationOptions } from './column-relation';
 export function columnTreeChildren<T>(value?: {
   cascade?:

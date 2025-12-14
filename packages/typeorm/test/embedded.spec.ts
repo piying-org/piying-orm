@@ -1,13 +1,8 @@
 import * as v from 'valibot';
 import { expect } from 'chai';
-import {
-  columnPrimaryKey,
-  entity,
-  entityUnique,
-  entityCheck,
-} from '@piying/orm/core';
+
 import { createInstance } from './util/create-builder';
-import { IDSchema, StrColumn } from './util/schema';
+import { IDSchema } from './util/schema';
 
 describe('embedded', () => {
   it('1层', async () => {
@@ -23,7 +18,7 @@ describe('embedded', () => {
 
     const repo = dataSource.getRepository(object.tableTest);
     await repo.save([{ o1: { k1: '123' } }]);
-    let result = await repo.find();
+    const result = await repo.find();
     expect(result[0].o1.k1).eq('123');
   });
   it('2层', async () => {
@@ -41,7 +36,7 @@ describe('embedded', () => {
 
     const repo = dataSource.getRepository(object.tableTest);
     await repo.save([{ o1: { o2: { k1: '123' } } }]);
-    let result = await repo.find();
+    const result = await repo.find();
     expect(result[0].o1.o2.k1).eq('123');
   });
   it('intersect', async () => {
@@ -63,7 +58,7 @@ describe('embedded', () => {
 
     const repo = dataSource.getRepository(object.tableTest);
     await repo.save([{ o1: { o2: { k1: '123' } } }]);
-    let result = await repo.find();
+    const result = await repo.find();
     expect(result[0].o1.o2.k1).eq('123');
   });
 });

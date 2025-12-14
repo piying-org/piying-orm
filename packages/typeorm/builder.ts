@@ -35,9 +35,7 @@ export class TypeormBuilder extends OrmBuilder {
   #getForeignKey(input: EntityTarget<any>) {
     return typeof input === 'string'
       ? input
-      : () => {
-          return this.#entityMap.get((input as any)())!;
-        };
+      : () => this.#entityMap.get((input as any)())!;
   }
   #buildChild(entity: AnyCoreSchemaHandle):
     | {
@@ -69,7 +67,7 @@ export class TypeormBuilder extends OrmBuilder {
     }
     options.default = entity.formConfig.defaultValue;
     if (entity.type === 'picklist' || entity.type === 'enum') {
-      let firstType = typeof entity.props!['options'][0];
+      const firstType = typeof entity.props!['options'][0];
       options.type = this.#config.defaultConfig?.types[firstType]?.type;
       options.enum = entity.props!['options'];
     } else {
@@ -108,18 +106,18 @@ export class TypeormBuilder extends OrmBuilder {
       relationIdItem = entity.relationId;
       columnItem = { ...options, ...entity.columnSchema };
     } else if (entity.arrayChild) {
-      let child = entity.arrayChild;
+      const child = entity.arrayChild;
       if (child.sourceSchema.type === 'object') {
-        let schema = this.buildEntity(child, entity.key! as string);
+        const schema = this.buildEntity(child, entity.key! as string);
         embeddedItem = { schema, array: true, ...entity.embedded };
       } else {
-        let childResult = this.#buildChild(child);
+        const childResult = this.#buildChild(child);
         columnItem = childResult?.columnItem!;
         indexItem = childResult?.indexItem;
       }
       columnItem.array = true;
     } else if (entity.children && entity.children.length) {
-      let schema = this.buildEntity(entity, entity.key as string);
+      const schema = this.buildEntity(entity, entity.key as string);
       embeddedItem = { schema, ...entity.embedded };
     } else if (entity.embedded) {
       embeddedItem = entity.embedded as any;
@@ -139,9 +137,9 @@ export class TypeormBuilder extends OrmBuilder {
     const indexList: EntitySchemaIndexOptions[] = [];
     const relations: Record<string, EntitySchemaRelationOptions> = {};
     const relationIds: EntitySchemaRelationIdOptions = {};
-    let embeddeds: Record<string, EntitySchemaEmbeddedColumnOptions> = {};
+    const embeddeds: Record<string, EntitySchemaEmbeddedColumnOptions> = {};
     for (const item of entity.children) {
-      let result = this.#buildChild(item);
+      const result = this.#buildChild(item);
       if (result?.indexItem) {
         indexList.push(result.indexItem);
       }
