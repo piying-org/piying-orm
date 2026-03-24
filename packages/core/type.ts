@@ -1,6 +1,6 @@
 export type FieldFormConfig = {
   required: boolean;
-  defaultValue: boolean;
+  defaultValue: any;
 };
 
 export interface DefaultOrmConfig {

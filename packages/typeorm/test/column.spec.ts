@@ -133,6 +133,30 @@ describe('column', () => {
     expect(entityList.length).eq(1);
     expect(entityList[0].obj).deep.eq({ k1: '1', k2: 2 });
   });
+  it('simple-json-optional', async () => {
+    const define = v.pipe(
+      v.object({
+        id: v.pipe(
+          v.string(),
+          columnPrimaryKey({ primary: true, generated: 'uuid' }),
+        ),
+        obj: v.pipe(
+          v.optional(v.object({ k1: v.string(), k2: v.number() }), {
+            k1: '11',
+            k2: 1,
+          }),
+          asControl(),
+          column({ type: 'simple-json' }),
+        ),
+      }),
+    );
+    const { object, dataSource } = await createInstance({ tableTest: define });
+    const repo = dataSource.getRepository(object.tableTest);
+    await repo.save([{ obj: { k1: '1', k2: 2 } }]);
+    const entityList = await repo.find();
+    expect(entityList.length).eq(1);
+    expect(entityList[0].obj).deep.eq({ k1: '1', k2: 2 });
+  });
 
   it('array(postgres)', async () => {
     const define = v.pipe(
