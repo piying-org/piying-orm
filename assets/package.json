@@ -31,13 +31,13 @@
   "sideEffects": false,
   "type": "module",
   "peerDependencies": {
-    "typeorm": "^0.3.26"
+    "typeorm": "^0.3.28"
   },
   "dependencies": {
     "@piying/valibot-visit": "^1.1.6",
-    "fast-equals": "^5.2.2",
+    "fast-equals": "^6.0.0",
     "rfdc": "^1.4.1",
-    "static-injector": "^6.1.2"
+    "static-injector": "^6.3.1"
   },
   "exports": {
     "./core": {
